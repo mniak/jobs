@@ -34,9 +34,9 @@ func (cj *CompositeJob) Wait(ctx context.Context) error {
 	return err
 }
 
-func (mcjs *CompositeJob) Stop(ctx context.Context) error {
+func (cj *CompositeJob) Stop(ctx context.Context) error {
 	var err error
-	for _, job := range mcjs.Jobs {
+	for _, job := range cj.Jobs {
 		multierr.AppendInto(&err, job.Stop(ctx))
 	}
 	return err
