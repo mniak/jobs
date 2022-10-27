@@ -8,6 +8,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCompositeJob_StartAndWait(t *testing.T) {
@@ -17,6 +18,20 @@ func TestCompositeJob_StartAndWait(t *testing.T) {
 	jobMock1 := NewMockJob(ctrl)
 	jobMock2 := NewMockJob(ctrl)
 
+	ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
+
+	fakeErrorStop1 := errors.New(gofakeit.SentenceSimple())
+	jobMock1.EXPECT().Start(ctxStart)
+	jobMock1.EXPECT().
+		Stop(gomock.Any()).
+		Return(fakeErrorStop1)
+
+	fakeErrorStop2 := errors.New(gofakeit.SentenceSimple())
+	jobMock2.EXPECT().Start(ctxStart)
+	jobMock2.EXPECT().
+		Stop(gomock.Any()).
+		Return(fakeErrorStop2)
+
 	compositeJob := CompositeJob{
 		Jobs: []Job{
 			jobMock1,
@@ -24,37 +39,23 @@ func TestCompositeJob_StartAndWait(t *testing.T) {
 		},
 	}
 
-	stop := make(chan struct{})
-
-	ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
-	jobMock1.EXPECT().Start(ctxStart)
-	jobMock2.EXPECT().Start(ctxStart)
 	compositeJob.Start(ctxStart)
 
-	go func() {
-		fakeError1 := errors.New(gofakeit.SentenceSimple())
-		jobMock1.EXPECT().
-			Wait().
-			Return(fakeError1)
-		fakeError2 := errors.New(gofakeit.SentenceSimple())
-		jobMock2.EXPECT().
-			Wait().
-			Return(fakeError2)
-		compositeJob.Wait()
-		close(stop)
-	}()
-
-	ctxStop := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
-	fakeError1 := errors.New(gofakeit.SentenceSimple())
+	fakeErrorWait1 := errors.New(gofakeit.SentenceSimple())
 	jobMock1.EXPECT().
-		Stop(gomock.Any()).
-		Return(fakeError1)
-	fakeError2 := errors.New(gofakeit.SentenceSimple())
+		Wait().
+		Return(fakeErrorWait1)
+
+	fakeErrorWait2 := errors.New(gofakeit.SentenceSimple())
 	jobMock2.EXPECT().
-		Stop(gomock.Any()).
-		Return(fakeError2)
-	compositeJob.Stop(ctxStop)
-	<-stop
+		Wait().
+		Return(fakeErrorWait2)
+
+	errWait := compositeJob.Wait()
+
+	require.Error(t, errWait)
+	assert.ErrorIs(t, errWait, fakeErrorWait1)
+	assert.ErrorIs(t, errWait, fakeErrorWait2)
 }
 
 func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
