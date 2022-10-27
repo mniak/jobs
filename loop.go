@@ -9,7 +9,6 @@ import (
 type loopjob struct {
 	action  func(ctx context.Context)
 	stop    chan struct{}
-	done    chan struct{}
 	started atomic.Bool
 }
 
@@ -17,7 +16,6 @@ func NewLoopJob(action func(ctx context.Context)) Job {
 	return &loopjob{
 		action: wrapActionWithPanicHandler(action),
 		stop:   make(chan struct{}),
-		done:   make(chan struct{}),
 	}
 }
 
@@ -32,7 +30,7 @@ func (l *loopjob) Start(ctx context.Context) error {
 		return ErrAlreadyStarted
 	}
 	go func() {
-		defer close(l.done)
+		defer close(l.stop)
 		for {
 			select {
 			case <-l.stop:
@@ -59,7 +57,7 @@ func (l *loopjob) Wait(ctx context.Context) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
-	case <-l.done:
+	case <-l.stop:
 		return nil
 	}
 }
