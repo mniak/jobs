@@ -52,7 +52,9 @@ func TestStartLoop_WhenWaitTimeout_ShouldStop(t *testing.T) {
 
 	ctx, _ := context.WithTimeout(context.Background(), 200*time.Millisecond)
 
-	assert.Error(t, looper.Wait(ctx))
+	err = looper.Wait(ctx)
+	assert.EqualError(t, err, "wait: context deadline exceeded")
+	assert.ErrorIs(t, err, context.DeadlineExceeded)
 	assert.Equal(t, context.DeadlineExceeded, ctx.Err())
 }
 
