@@ -18,7 +18,7 @@ func (cj *CompositeJob) Start(ctx context.Context) error {
 
 	var result error
 	for job, err := range statuses {
-		if multierr.AppendInto(&result, err) {
+		if !multierr.AppendInto(&result, err) {
 			multierr.AppendInto(&result, job.Stop(ctx))
 		}
 	}
