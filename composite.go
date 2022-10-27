@@ -25,10 +25,10 @@ func (cj *CompositeJob) Start(ctx context.Context) error {
 	return result
 }
 
-func (cj *CompositeJob) Wait(ctx context.Context) error {
+func (cj *CompositeJob) Wait() error {
 	var err error
 	for _, srv := range cj.Jobs {
-		w := srv.Wait(ctx)
+		w := srv.Wait()
 		multierr.AppendInto(&err, w)
 	}
 	return err

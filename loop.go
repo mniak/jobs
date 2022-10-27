@@ -3,7 +3,6 @@ package jobs
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"go.uber.org/atomic"
 )
 
@@ -57,13 +56,8 @@ func (l *loopjob) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (l *loopjob) Wait(ctx context.Context) error {
-	select {
-	case err := <-l.stopped:
-		return err
-	case <-ctx.Done():
-		return errors.Wrap(ctx.Err(), "wait")
-	}
+func (l *loopjob) Wait() error {
+	return <-l.stopped
 }
 
 func wrapActionWithPanicHandler(action func(ctx context.Context)) func(ctx context.Context) {

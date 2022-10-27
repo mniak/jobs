@@ -31,16 +31,15 @@ func TestCompositeJob_StartAndWait(t *testing.T) {
 	compositeJob.Start(ctxStart)
 
 	go func() {
-		ctxWait := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
 		fakeError1 := errors.New(gofakeit.SentenceSimple())
 		jobMock1.EXPECT().
-			Wait(gomock.Any()).
+			Wait().
 			Return(fakeError1)
 		fakeError2 := errors.New(gofakeit.SentenceSimple())
 		jobMock2.EXPECT().
-			Wait(gomock.Any()).
+			Wait().
 			Return(fakeError2)
-		compositeJob.Wait(ctxWait)
+		compositeJob.Wait()
 		close(stop)
 	}()
 
