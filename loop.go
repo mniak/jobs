@@ -15,7 +15,7 @@ type loopjob struct {
 
 func NewLoopJob(action func(ctx context.Context)) Job {
 	return &loopjob{
-		action: action,
+		action: wrapActionWithPanicHandler(action),
 		stop:   make(chan struct{}),
 		done:   make(chan struct{}),
 	}
@@ -61,5 +61,14 @@ func (l *loopjob) Wait(ctx context.Context) error {
 		return ctx.Err()
 	case <-l.done:
 		return nil
+	}
+}
+
+func wrapActionWithPanicHandler(action func(ctx context.Context)) func(ctx context.Context) {
+	return func(ctx context.Context) {
+		defer func() {
+			recover()
+		}()
+		action(ctx)
 	}
 }

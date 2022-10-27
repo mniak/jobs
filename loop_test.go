@@ -56,3 +56,31 @@ func TestStartLoop_WhenWaitTimeout_ShouldStop(t *testing.T) {
 	assert.Error(t, looper.Wait(ctx))
 	require.Equal(t, context.DeadlineExceeded, ctx.Err())
 }
+
+func TestStartLoop_WhenPanics_ShouldNotStopLooping(t *testing.T) {
+	done := make(chan struct{})
+	var count int
+
+	assert.NotPanics(t, func() {
+		ctx := context.Background()
+		looper, err := StartLoop(ctx, func(ctx context.Context) {
+			switch count {
+			case 5:
+				count++
+				panic("this is the panic 5")
+			case 10:
+				close(done)
+			default:
+				count++
+			}
+		})
+		require.NoError(t, err)
+
+		<-done
+		require.NoError(t, looper.Stop(ctx))
+
+		looper.Wait(ctx)
+		require.NoError(t, ctx.Err())
+		assert.GreaterOrEqual(t, count, 10)
+	})
+}
