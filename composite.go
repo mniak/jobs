@@ -28,8 +28,8 @@ func (cj *CompositeJob) Start(ctx context.Context) error {
 func (cj *CompositeJob) Wait() error {
 	var err error
 	for _, srv := range cj.Jobs {
-		w := srv.Wait()
-		multierr.AppendInto(&err, w)
+		werr := srv.Wait()
+		multierr.AppendInto(&err, werr)
 	}
 	return err
 }
