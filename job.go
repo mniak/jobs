@@ -7,7 +7,7 @@ import (
 
 type StartedJob interface {
 	Stop(ctx context.Context) error
-	Wait(ctx context.Context) error
+	Wait() error
 }
 
 //go:generate mockgen --package=jobs --destination=job_mock_test.go --source=job.go Job

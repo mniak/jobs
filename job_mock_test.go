@@ -49,17 +49,17 @@ func (mr *MockStartedJobMockRecorder) Stop(ctx interface{}) *gomock.Call {
 }
 
 // Wait mocks base method.
-func (m *MockStartedJob) Wait(ctx context.Context) error {
+func (m *MockStartedJob) Wait() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Wait", ctx)
+	ret := m.ctrl.Call(m, "Wait")
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Wait indicates an expected call of Wait.
-func (mr *MockStartedJobMockRecorder) Wait(ctx interface{}) *gomock.Call {
+func (mr *MockStartedJobMockRecorder) Wait() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Wait", reflect.TypeOf((*MockStartedJob)(nil).Wait), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Wait", reflect.TypeOf((*MockStartedJob)(nil).Wait))
 }
 
 // MockJob is a mock of Job interface.
@@ -114,15 +114,15 @@ func (mr *MockJobMockRecorder) Stop(ctx interface{}) *gomock.Call {
 }
 
 // Wait mocks base method.
-func (m *MockJob) Wait(ctx context.Context) error {
+func (m *MockJob) Wait() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Wait", ctx)
+	ret := m.ctrl.Call(m, "Wait")
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Wait indicates an expected call of Wait.
-func (mr *MockJobMockRecorder) Wait(ctx interface{}) *gomock.Call {
+func (mr *MockJobMockRecorder) Wait() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Wait", reflect.TypeOf((*MockJob)(nil).Wait), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Wait", reflect.TypeOf((*MockJob)(nil).Wait))
 }
