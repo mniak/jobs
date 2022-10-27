@@ -24,6 +24,7 @@ func TestStartLoop_HappyScenario(t *testing.T) {
 
 	<-done
 	require.NoError(t, looper.Stop(ctx1))
+
 	assert.NoError(t, looper.Wait())
 	assert.NoError(t, ctx1.Err())
 }
