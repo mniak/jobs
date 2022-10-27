@@ -28,8 +28,8 @@ func TestStartLoop_HappyScenario(t *testing.T) {
 	ctx2, _ := context.WithTimeout(context.Background(), 2*time.Second)
 	looper.Wait(ctx2)
 
-	require.NoError(t, ctx1.Err())
-	require.NoError(t, ctx2.Err())
+	assert.NoError(t, ctx1.Err())
+	assert.NoError(t, ctx2.Err())
 }
 
 func TestStartLoop_WhenStartContextTimeout_ShouldStop(t *testing.T) {
@@ -40,9 +40,8 @@ func TestStartLoop_WhenStartContextTimeout_ShouldStop(t *testing.T) {
 	require.NoError(t, err)
 
 	time.Sleep(200 * time.Millisecond)
-	assert.NoError(t, looper.Wait(context.Background()))
-
-	require.Equal(t, context.DeadlineExceeded, ctx.Err())
+	assert.Equal(t, context.DeadlineExceeded, looper.Wait(context.Background()))
+	assert.Equal(t, context.DeadlineExceeded, ctx.Err())
 }
 
 func TestStartLoop_WhenWaitTimeout_ShouldStop(t *testing.T) {
@@ -54,7 +53,7 @@ func TestStartLoop_WhenWaitTimeout_ShouldStop(t *testing.T) {
 	ctx, _ := context.WithTimeout(context.Background(), 200*time.Millisecond)
 
 	assert.Error(t, looper.Wait(ctx))
-	require.Equal(t, context.DeadlineExceeded, ctx.Err())
+	assert.Equal(t, context.DeadlineExceeded, ctx.Err())
 }
 
 func TestStartLoop_WhenPanics_ShouldNotStopLooping(t *testing.T) {
@@ -80,7 +79,7 @@ func TestStartLoop_WhenPanics_ShouldNotStopLooping(t *testing.T) {
 		require.NoError(t, looper.Stop(ctx))
 
 		looper.Wait(ctx)
-		require.NoError(t, ctx.Err())
+		assert.NoError(t, ctx.Err())
 		assert.GreaterOrEqual(t, count, 10)
 	})
 }

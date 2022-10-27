@@ -3,13 +3,14 @@ package jobs
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	"go.uber.org/atomic"
 )
 
 type loopjob struct {
 	action  func(ctx context.Context)
 	stop    chan struct{}
-	stopped chan struct{}
+	stopped chan error
 	started atomic.Bool
 }
 
@@ -17,7 +18,7 @@ func NewLoopJob(action func(ctx context.Context)) Job {
 	return &loopjob{
 		action:  wrapActionWithPanicHandler(action),
 		stop:    make(chan struct{}),
-		stopped: make(chan struct{}),
+		stopped: make(chan error),
 	}
 }
 
@@ -32,12 +33,13 @@ func (l *loopjob) Start(ctx context.Context) error {
 		return ErrAlreadyStarted
 	}
 	go func() {
-		defer close(l.stopped)
 		for {
 			select {
 			case <-l.stop:
+				l.stopped <- nil
 				return
 			case <-ctx.Done():
+				l.stopped <- ctx.Err()
 				return
 			default:
 				l.action(ctx)
@@ -57,10 +59,10 @@ func (l *loopjob) Stop(ctx context.Context) error {
 
 func (l *loopjob) Wait(ctx context.Context) error {
 	select {
+	case err := <-l.stopped:
+		return err
 	case <-ctx.Done():
-		return ctx.Err()
-	case <-l.stopped:
-		return nil
+		return errors.Wrap(ctx.Err(), "wait")
 	}
 }
 
