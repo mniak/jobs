@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCompositeJob_StartAndWait(t *testing.T) {
+func TestCompositeJob_HappyScenario(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -20,17 +20,8 @@ func TestCompositeJob_StartAndWait(t *testing.T) {
 
 	ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
 
-	fakeErrorStop1 := errors.New(gofakeit.SentenceSimple())
 	jobMock1.EXPECT().Start(ctxStart)
-	jobMock1.EXPECT().
-		Stop(gomock.Any()).
-		Return(fakeErrorStop1)
-
-	fakeErrorStop2 := errors.New(gofakeit.SentenceSimple())
 	jobMock2.EXPECT().Start(ctxStart)
-	jobMock2.EXPECT().
-		Stop(gomock.Any()).
-		Return(fakeErrorStop2)
 
 	compositeJob := CompositeJob{
 		Jobs: []Job{
@@ -39,7 +30,8 @@ func TestCompositeJob_StartAndWait(t *testing.T) {
 		},
 	}
 
-	compositeJob.Start(ctxStart)
+	err := compositeJob.Start(ctxStart)
+	require.NoError(t, err)
 
 	fakeErrorWait1 := errors.New(gofakeit.SentenceSimple())
 	jobMock1.EXPECT().
@@ -52,10 +44,26 @@ func TestCompositeJob_StartAndWait(t *testing.T) {
 		Return(fakeErrorWait2)
 
 	errWait := compositeJob.Wait()
-
 	require.Error(t, errWait)
 	assert.ErrorIs(t, errWait, fakeErrorWait1)
 	assert.ErrorIs(t, errWait, fakeErrorWait2)
+
+	ctxStop := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
+
+	fakeErrorStop1 := errors.New(gofakeit.SentenceSimple())
+	jobMock1.EXPECT().
+		Stop(ctxStop).
+		Return(fakeErrorStop1)
+
+	fakeErrorStop2 := errors.New(gofakeit.SentenceSimple())
+	jobMock2.EXPECT().
+		Stop(ctxStop).
+		Return(fakeErrorStop2)
+
+	errStop := compositeJob.Stop(ctxStop)
+	require.Error(t, errStop)
+	assert.ErrorIs(t, errStop, fakeErrorStop1)
+	assert.ErrorIs(t, errStop, fakeErrorStop2)
 }
 
 func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
@@ -66,14 +74,16 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 		fakeError1 := errors.New(gofakeit.SentenceSimple())
 		fakeError2 := errors.New(gofakeit.SentenceSimple())
 
+		ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
+
 		jobMock1 := NewMockJob(ctrl)
 		jobMock1.EXPECT().
-			Start(context.TODO()).
+			Start(ctxStart).
 			Return(fakeError1)
 
 		jobMock2 := NewMockJob(ctrl)
 		jobMock2.EXPECT().
-			Start(context.TODO()).
+			Start(ctxStart).
 			Return(fakeError2)
 
 		compositeJob := CompositeJob{
@@ -83,7 +93,7 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 			},
 		}
 
-		err := compositeJob.Start(context.TODO())
+		err := compositeJob.Start(ctxStart)
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, fakeError1)
 		assert.ErrorIs(t, err, fakeError2)
@@ -96,17 +106,19 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 
 			fakeError1 := errors.New(gofakeit.SentenceSimple())
 
+			ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
+
 			jobMock1 := NewMockJob(ctrl)
 			jobMock1.EXPECT().
-				Start(context.TODO()).
+				Start(ctxStart).
 				Return(fakeError1)
 
 			jobMock2 := NewMockJob(ctrl)
 			jobMock2.EXPECT().
-				Start(context.TODO()).
+				Start(ctxStart).
 				Return(nil)
 			jobMock2.EXPECT().
-				Stop(context.TODO()).
+				Stop(ctxStart).
 				Return(nil)
 
 			compositeJob := CompositeJob{
@@ -116,7 +128,7 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 				},
 			}
 
-			err := compositeJob.Start(context.TODO())
+			err := compositeJob.Start(ctxStart)
 			assert.Error(t, err)
 			assert.ErrorIs(t, err, fakeError1)
 		})
@@ -127,17 +139,19 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 			fakeError1 := errors.New(gofakeit.SentenceSimple())
 			fakeErrorStop2 := errors.New(gofakeit.SentenceSimple())
 
+			ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
+
 			jobMock1 := NewMockJob(ctrl)
 			jobMock1.EXPECT().
-				Start(context.TODO()).
+				Start(ctxStart).
 				Return(fakeError1)
 
 			jobMock2 := NewMockJob(ctrl)
 			jobMock2.EXPECT().
-				Start(context.TODO()).
+				Start(ctxStart).
 				Return(nil)
 			jobMock2.EXPECT().
-				Stop(context.TODO()).
+				Stop(ctxStart).
 				Return(fakeErrorStop2)
 
 			compositeJob := CompositeJob{
@@ -147,7 +161,7 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 				},
 			}
 
-			err := compositeJob.Start(context.TODO())
+			err := compositeJob.Start(ctxStart)
 			assert.Error(t, err)
 			assert.ErrorIs(t, err, fakeError1)
 			assert.ErrorIs(t, err, fakeErrorStop2)
@@ -161,17 +175,19 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 
 			fakeError2 := errors.New(gofakeit.SentenceSimple())
 
+			ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
+
 			jobMock1 := NewMockJob(ctrl)
 			jobMock1.EXPECT().
-				Start(context.TODO()).
+				Start(ctxStart).
 				Return(nil)
 			jobMock1.EXPECT().
-				Stop(context.TODO()).
+				Stop(ctxStart).
 				Return(nil)
 
 			jobMock2 := NewMockJob(ctrl)
 			jobMock2.EXPECT().
-				Start(context.TODO()).
+				Start(ctxStart).
 				Return(fakeError2)
 
 			compositeJob := CompositeJob{
@@ -181,7 +197,7 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 				},
 			}
 
-			err := compositeJob.Start(context.TODO())
+			err := compositeJob.Start(ctxStart)
 			assert.Error(t, err)
 			assert.ErrorIs(t, err, fakeError2)
 		})
@@ -193,17 +209,19 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 			fakeErrorStop1 := errors.New(gofakeit.SentenceSimple())
 			fakeError2 := errors.New(gofakeit.SentenceSimple())
 
+			ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
+
 			jobMock1 := NewMockJob(ctrl)
 			jobMock1.EXPECT().
-				Start(context.TODO()).
+				Start(ctxStart).
 				Return(nil)
 			jobMock1.EXPECT().
-				Stop(context.TODO()).
+				Stop(ctxStart).
 				Return(fakeErrorStop1)
 
 			jobMock2 := NewMockJob(ctrl)
 			jobMock2.EXPECT().
-				Start(context.TODO()).
+				Start(ctxStart).
 				Return(fakeError2)
 
 			compositeJob := CompositeJob{
@@ -213,7 +231,7 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 				},
 			}
 
-			err := compositeJob.Start(context.TODO())
+			err := compositeJob.Start(ctxStart)
 			assert.Error(t, err)
 			assert.ErrorIs(t, err, fakeErrorStop1)
 			assert.ErrorIs(t, err, fakeError2)

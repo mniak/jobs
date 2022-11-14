@@ -12,14 +12,21 @@ type CompositeJob struct {
 
 func (cj *CompositeJob) Start(ctx context.Context) error {
 	statuses := make(map[Job]error)
+	hasError := false
 	for _, job := range cj.Jobs {
-		statuses[job] = job.Start(ctx)
+		err := job.Start(ctx)
+		statuses[job] = err
+		if err != nil {
+			hasError = true
+		}
 	}
 
 	var result error
-	for job, err := range statuses {
-		if !multierr.AppendInto(&result, err) {
-			multierr.AppendInto(&result, job.Stop(ctx))
+	if hasError {
+		for job, err := range statuses {
+			if !multierr.AppendInto(&result, err) {
+				multierr.AppendInto(&result, job.Stop(ctx))
+			}
 		}
 	}
 	return result
