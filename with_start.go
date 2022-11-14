@@ -22,8 +22,8 @@ func (j *jobWithPreStart) Start(ctx context.Context) error {
 	return j.job.Start(ctx)
 }
 
-func (j *jobWithPreStart) Shutdown(ctx context.Context) error {
-	return j.job.Shutdown(ctx)
+func (j *jobWithPreStart) Stop(ctx context.Context) error {
+	return j.job.Stop(ctx)
 }
 
 func (j *jobWithPreStart) Wait() error {

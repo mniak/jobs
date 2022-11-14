@@ -48,26 +48,26 @@ func TestCompositeJob_HappyScenario(t *testing.T) {
 	assert.ErrorIs(t, errWait, fakeErrorWait1)
 	assert.ErrorIs(t, errWait, fakeErrorWait2)
 
-	ctxShutdown := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
+	ctxStop := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
 
-	fakeErrorShutdown1 := errors.New(gofakeit.SentenceSimple())
+	fakeErrorStop1 := errors.New(gofakeit.SentenceSimple())
 	jobMock1.EXPECT().
-		Shutdown(ctxShutdown).
-		Return(fakeErrorShutdown1)
+		Stop(ctxStop).
+		Return(fakeErrorStop1)
 
-	fakeErrorShutdown2 := errors.New(gofakeit.SentenceSimple())
+	fakeErrorStop2 := errors.New(gofakeit.SentenceSimple())
 	jobMock2.EXPECT().
-		Shutdown(ctxShutdown).
-		Return(fakeErrorShutdown2)
+		Stop(ctxStop).
+		Return(fakeErrorStop2)
 
-	errShutdown := compositeJob.Shutdown(ctxShutdown)
-	require.Error(t, errShutdown)
-	assert.ErrorIs(t, errShutdown, fakeErrorShutdown1)
-	assert.ErrorIs(t, errShutdown, fakeErrorShutdown2)
+	errStop := compositeJob.Stop(ctxStop)
+	require.Error(t, errStop)
+	assert.ErrorIs(t, errStop, fakeErrorStop1)
+	assert.ErrorIs(t, errStop, fakeErrorStop2)
 }
 
 func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
-	t.Run("When both fail, none should Shutdown", func(t *testing.T) {
+	t.Run("When both fail, none should Stop", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -99,8 +99,8 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 		assert.ErrorIs(t, err, fakeError2)
 	})
 
-	t.Run("When only 1st fails, 2nd should Start and Shutdown", func(t *testing.T) {
-		t.Run("when Shutdown does not fail", func(t *testing.T) {
+	t.Run("When only 1st fails, 2nd should Start and Stop", func(t *testing.T) {
+		t.Run("when Stop does not fail", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
@@ -118,7 +118,7 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 				Start(ctxStart).
 				Return(nil)
 			jobMock2.EXPECT().
-				Shutdown(ctxStart).
+				Stop(ctxStart).
 				Return(nil)
 
 			compositeJob := CompositeJob{
@@ -132,12 +132,12 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 			assert.Error(t, err)
 			assert.ErrorIs(t, err, fakeError1)
 		})
-		t.Run("when Shutdown fails", func(t *testing.T) {
+		t.Run("when Stop fails", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
 			fakeError1 := errors.New(gofakeit.SentenceSimple())
-			fakeErrorShutdown2 := errors.New(gofakeit.SentenceSimple())
+			fakeErrorStop2 := errors.New(gofakeit.SentenceSimple())
 
 			ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
 
@@ -151,8 +151,8 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 				Start(ctxStart).
 				Return(nil)
 			jobMock2.EXPECT().
-				Shutdown(ctxStart).
-				Return(fakeErrorShutdown2)
+				Stop(ctxStart).
+				Return(fakeErrorStop2)
 
 			compositeJob := CompositeJob{
 				Jobs: []Job{
@@ -164,12 +164,12 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 			err := compositeJob.Start(ctxStart)
 			assert.Error(t, err)
 			assert.ErrorIs(t, err, fakeError1)
-			assert.ErrorIs(t, err, fakeErrorShutdown2)
+			assert.ErrorIs(t, err, fakeErrorStop2)
 		})
 	})
 
-	t.Run("When 2nd fails, only 1st should Shutdown", func(t *testing.T) {
-		t.Run("when Shutdown does not fail", func(t *testing.T) {
+	t.Run("When 2nd fails, only 1st should Stop", func(t *testing.T) {
+		t.Run("when Stop does not fail", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
@@ -182,7 +182,7 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 				Start(ctxStart).
 				Return(nil)
 			jobMock1.EXPECT().
-				Shutdown(ctxStart).
+				Stop(ctxStart).
 				Return(nil)
 
 			jobMock2 := NewMockJob(ctrl)
@@ -202,11 +202,11 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 			assert.ErrorIs(t, err, fakeError2)
 		})
 
-		t.Run("when Shutdown fails", func(t *testing.T) {
+		t.Run("when Stop fails", func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			fakeErrorShutdown1 := errors.New(gofakeit.SentenceSimple())
+			fakeErrorStop1 := errors.New(gofakeit.SentenceSimple())
 			fakeError2 := errors.New(gofakeit.SentenceSimple())
 
 			ctxStart := context.WithValue(context.TODO(), gofakeit.Word(), gofakeit.Word())
@@ -216,8 +216,8 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 				Start(ctxStart).
 				Return(nil)
 			jobMock1.EXPECT().
-				Shutdown(ctxStart).
-				Return(fakeErrorShutdown1)
+				Stop(ctxStart).
+				Return(fakeErrorStop1)
 
 			jobMock2 := NewMockJob(ctrl)
 			jobMock2.EXPECT().
@@ -233,7 +233,7 @@ func TestCompositeJob_WhenMultipleStartErrors_ShouldGroupAll(t *testing.T) {
 
 			err := compositeJob.Start(ctxStart)
 			assert.Error(t, err)
-			assert.ErrorIs(t, err, fakeErrorShutdown1)
+			assert.ErrorIs(t, err, fakeErrorStop1)
 			assert.ErrorIs(t, err, fakeError2)
 		})
 	})

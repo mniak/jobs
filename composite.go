@@ -25,7 +25,7 @@ func (cj *CompositeJob) Start(ctx context.Context) error {
 	if hasError {
 		for job, err := range statuses {
 			if !multierr.AppendInto(&result, err) {
-				multierr.AppendInto(&result, job.Shutdown(ctx))
+				multierr.AppendInto(&result, job.Stop(ctx))
 			}
 		}
 	}
@@ -41,10 +41,10 @@ func (cj *CompositeJob) Wait() error {
 	return err
 }
 
-func (cj *CompositeJob) Shutdown(ctx context.Context) error {
+func (cj *CompositeJob) Stop(ctx context.Context) error {
 	var err error
 	for _, job := range cj.Jobs {
-		multierr.AppendInto(&err, job.Shutdown(ctx))
+		multierr.AppendInto(&err, job.Stop(ctx))
 	}
 	return err
 }

@@ -23,13 +23,13 @@ func TestStartLoop_HappyScenario(t *testing.T) {
 	require.NoError(t, err)
 
 	<-done
-	require.NoError(t, looper.Shutdown(ctx1))
+	require.NoError(t, looper.Stop(ctx1))
 
 	assert.NoError(t, looper.Wait())
 	assert.NoError(t, ctx1.Err())
 }
 
-func TestStartLoop_WhenStartContextTimeout_ShouldShutdown(t *testing.T) {
+func TestStartLoop_WhenStartContextTimeout_ShouldStop(t *testing.T) {
 	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
 	looper, err := StartLoop(ctx, func(ctx context.Context) {
 		time.Sleep(time.Second)
@@ -41,7 +41,7 @@ func TestStartLoop_WhenStartContextTimeout_ShouldShutdown(t *testing.T) {
 	assert.Equal(t, context.DeadlineExceeded, ctx.Err())
 }
 
-func TestStartLoop_WhenPanics_ShouldNotShutdownLooping(t *testing.T) {
+func TestStartLoop_WhenPanics_ShouldNotStopLooping(t *testing.T) {
 	done := make(chan struct{})
 	var count int
 
@@ -61,7 +61,7 @@ func TestStartLoop_WhenPanics_ShouldNotShutdownLooping(t *testing.T) {
 		require.NoError(t, err)
 
 		<-done
-		require.NoError(t, looper.Shutdown(ctx))
+		require.NoError(t, looper.Stop(ctx))
 
 		assert.NoError(t, looper.Wait())
 		assert.GreaterOrEqual(t, count, 10)

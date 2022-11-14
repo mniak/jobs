@@ -48,7 +48,7 @@ func (l *loopjob) Start(ctx context.Context) error {
 	return nil
 }
 
-func (l *loopjob) Shutdown(ctx context.Context) error {
+func (l *loopjob) Stop(ctx context.Context) error {
 	if !l.started.Load() {
 		return ErrNotYetStarted
 	}

@@ -34,18 +34,18 @@ func (m *MockStartedJob) EXPECT() *MockStartedJobMockRecorder {
 	return m.recorder
 }
 
-// Shutdown mocks base method.
-func (m *MockStartedJob) Shutdown(ctx context.Context) error {
+// Stop mocks base method.
+func (m *MockStartedJob) Stop(ctx context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Shutdown", ctx)
+	ret := m.ctrl.Call(m, "Stop", ctx)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Shutdown indicates an expected call of Shutdown.
-func (mr *MockStartedJobMockRecorder) Shutdown(ctx interface{}) *gomock.Call {
+// Stop indicates an expected call of Stop.
+func (mr *MockStartedJobMockRecorder) Stop(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Shutdown", reflect.TypeOf((*MockStartedJob)(nil).Shutdown), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockStartedJob)(nil).Stop), ctx)
 }
 
 // Wait mocks base method.
@@ -85,20 +85,6 @@ func (m *MockJob) EXPECT() *MockJobMockRecorder {
 	return m.recorder
 }
 
-// Shutdown mocks base method.
-func (m *MockJob) Shutdown(ctx context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Shutdown", ctx)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Shutdown indicates an expected call of Shutdown.
-func (mr *MockJobMockRecorder) Shutdown(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Shutdown", reflect.TypeOf((*MockJob)(nil).Shutdown), ctx)
-}
-
 // Start mocks base method.
 func (m *MockJob) Start(ctx context.Context) error {
 	m.ctrl.T.Helper()
@@ -111,6 +97,20 @@ func (m *MockJob) Start(ctx context.Context) error {
 func (mr *MockJobMockRecorder) Start(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockJob)(nil).Start), ctx)
+}
+
+// Stop mocks base method.
+func (m *MockJob) Stop(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Stop", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Stop indicates an expected call of Stop.
+func (mr *MockJobMockRecorder) Stop(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockJob)(nil).Stop), ctx)
 }
 
 // Wait mocks base method.

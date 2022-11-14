@@ -6,7 +6,7 @@ import (
 )
 
 type StartedJob interface {
-	Shutdown(ctx context.Context) error
+	Stop(ctx context.Context) error
 	Wait() error
 }
 
