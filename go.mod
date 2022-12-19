@@ -3,11 +3,11 @@ module github.com/mniak/jobs
 go 1.19
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.19.0
+	github.com/brianvoe/gofakeit/v6 v6.20.1
 	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/atomic v1.10.0
-	go.uber.org/multierr v1.8.0
+	go.uber.org/multierr v1.9.0
 )
 
 require (
