@@ -1,9 +1,10 @@
 module github.com/mniak/jobs
 
-go 1.19
+go 1.22
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.19.0
+	github.com/brianvoe/gofakeit/v6 v6.28.0
+	github.com/brianvoe/gofakeit/v7 v7.17.0
 	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/atomic v1.10.0
